@@ -1,1 +1,1 @@
-Ett point and click spel om en gris och en vandrande pinne
+Ett point and click spel om en gris och en vandrande pinne.
