@@ -1201,7 +1201,7 @@ function drawGardenGnome(ctx, x, y) {
   // Face
   ctx.fillStyle = '#e8c090';
   ctx.beginPath(); ctx.ellipse(x, y - 22, 12, 10, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.strokeStyle = '#c0906060'; ctx.lineWidth = 1; ctx.stroke();
+  ctx.strokeStyle = 'rgba(192,144,96,0.38)'; ctx.lineWidth = 1; ctx.stroke();
   // Rosy cheeks
   ctx.fillStyle = 'rgba(230,120,100,0.5)';
   ctx.beginPath(); ctx.arc(x - 8, y - 20, 5, 0, Math.PI * 2); ctx.fill();
@@ -1476,7 +1476,7 @@ function getHotspots() {
                 { who: 'Fetsson', text: "I have the key! Let me select it from my inventory and use it on the door." },
               ]);
             } else {
-              const dlg = Object.keys(state.flags).some(k => k === 'farmhouse_shown')
+              const dlg = state.flags.farmhouse_shown
                 ? DLG.farmhouse_locked_again
                 : DLG.farmhouse_locked_first;
               state.flags.farmhouse_shown = true;
