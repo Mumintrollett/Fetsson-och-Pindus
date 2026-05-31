@@ -163,21 +163,23 @@ export function render(ctx) {
     }
   }
 
-  // Splash effect
+  // Splash effect — only render once the ripple radius is positive
   if (splashCol >= 0) {
     const sx  = COL_X[splashCol];
     const sy  = ROW_Y[splashRow];
     const age = 22 - shakeTimer;
     const r   = age * 7;
-    ctx.strokeStyle = `rgba(60,160,255,${Math.max(0, 0.8 - age * 0.04)})`;
-    ctx.lineWidth   = 2.5;
-    ctx.beginPath();
-    ctx.arc(sx, sy + 20, r, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.strokeStyle = `rgba(120,200,255,${Math.max(0, 0.6 - age * 0.03)})`;
-    ctx.beginPath();
-    ctx.arc(sx, sy + 20, r * 0.5, 0, Math.PI * 2);
-    ctx.stroke();
+    if (r > 0) {
+      ctx.strokeStyle = `rgba(60,160,255,${Math.max(0, 0.8 - age * 0.04)})`;
+      ctx.lineWidth   = 2.5;
+      ctx.beginPath();
+      ctx.arc(sx, sy + 20, r, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.strokeStyle = `rgba(120,200,255,${Math.max(0, 0.6 - age * 0.03)})`;
+      ctx.beginPath();
+      ctx.arc(sx, sy + 20, r * 0.5, 0, Math.PI * 2);
+      ctx.stroke();
+    }
   }
 
   // Player icon (small silhouette with torch)
