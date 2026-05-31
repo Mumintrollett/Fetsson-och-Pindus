@@ -26,7 +26,6 @@ const PLAYER_Y   = 308;                    // feet y on stones / banks
 
 // Symbol names for hint text
 const SYM_NAME = ['Arch', 'Peak', 'Bowl', 'Diamond'];
-const SYM_HINT = ['middle', 'top', 'bottom', 'middle'];
 
 let playerCol   = -1;   // -1 = left bank, 0-3 = on column, 4 = right bank
 let shakeTimer  = 0;
@@ -177,7 +176,7 @@ export function render(ctx) {
   ctx.font = '11px Georgia, serif';
   ctx.textAlign = 'center';
   ctx.fillText(
-    'Read the carved symbols — Arch=mid · Peak=top · Bowl=bot · Diamond=mid · Click the safe stone in each column',
+    'Carved symbols mark each column — read them carefully before you step',
     W / 2, 27
   );
 
@@ -326,12 +325,11 @@ function _drawSymbols(ctx) {
         break;
     }
 
-    // Symbol name
+    // Symbol name only — no hint text
     ctx.fillStyle = 'rgba(180,160,240,0.7)';
     ctx.font      = '9px Georgia, serif';
     ctx.textAlign = 'center';
     ctx.fillText(SYM_NAME[col], cx, symY + 28);
-    ctx.fillText(`(${SYM_HINT[col]})`, cx, symY + 38);
   });
 }
 

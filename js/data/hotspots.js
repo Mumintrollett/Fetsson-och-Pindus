@@ -140,7 +140,7 @@ const farmyardHotspots = [
           setTimeout(() => transitionTo('kitchen', 400, FLOOR_Y, 1), 600);
         });
       } else if (state.flags.keyPickedUp) {
-        showDialogue([{ who: 'Fetsson', text: 'I have the key! Let me select it from my inventory and use it on the door.' }]);
+        showDialogue([{ who: 'Fetsson', text: 'The door is locked. I have a key somewhere…' }]);
       } else {
         const lines = state.flags.farmhouseShown
           ? DLG.farmhouse_locked_again
@@ -165,9 +165,9 @@ const farmyardHotspots = [
           deselectItem();
         });
       } else if (state.flags.bucketPickedUp && !state.flags.bucketFilled) {
-        showDialogue([{ who: 'Fetsson', text: 'I should select the bucket from my inventory and use it on the well.' }]);
+        showDialogue([{ who: 'Fetsson', text: 'The well water looks cold. And I already have a bucket.' }, { who: 'Pindus', text: 'Mm.' }]);
       } else if (state.flags.bucketFilled) {
-        showDialogue([{ who: 'Fetsson', text: 'The well is still here, but my bucket is already full.' }]);
+        showDialogue([{ who: 'Pindus', text: 'The well looks patient, as wells tend to be.' }]);
       } else {
         showDialogue(DLG.well_no_bucket);
       }
@@ -214,7 +214,7 @@ const farmyardHotspots = [
           deselectItem();
         });
       } else if (state.flags.bucketFilled) {
-        showDialogue([{ who: 'Fetsson', text: 'I should select the water bucket from my inventory and use it on the gate.' }]);
+        showDialogue([{ who: 'Fetsson', text: 'Those hinges have not moved in years.' }, { who: 'Pindus', text: 'Iron\'s greatest weakness tends to be patience and something wet.' }]);
       } else if (state.flags.bucketPickedUp) {
         showDialogue(DLG.rusty_gate_hint);
       } else {
@@ -357,7 +357,7 @@ const bridgeHotspots = [
     onInteract() {
       showDialogue([
         { who: 'Fetsson', text: 'The gaps are too wide — I\'d fall straight into the ravine.' },
-        { who: 'Pindus',  text: 'Fix the floor first!  The woodpile near the left edge has spare planks.' },
+        { who: 'Pindus',  text: 'Inadvisable. Even by my standards.' },
       ]);
     },
   },
@@ -377,8 +377,8 @@ const bridgeHotspots = [
       } else {
         // Launch the plank-laying minigame
         showDialogue([
-          { who: 'Fetsson', text: 'Let\'s see… three gaps. I have planks of different sizes in my arms.' },
-          { who: 'Pindus',  text: 'Match each plank to the right gap — they must fit exactly before you can nail them!' },
+          { who: 'Fetsson', text: 'Three gaps. I have planks of different sizes.' },
+          { who: 'Pindus',  text: 'Boards go in holes. This is well within your skill set.' },
         ], () => {
           startMinigame(plankMinigame, () => {
             state.flags.bridgeFloorFixed = true;
@@ -407,7 +407,7 @@ const bridgeHotspots = [
           removeItem('rope');
         });
       } else if (state.inventory.includes('rope')) {
-        showDialogue([{ who: 'Fetsson', text: 'I have rope! Let me select it from my inventory and use it on the railing.' }]);
+        showDialogue([{ who: 'Fetsson', text: 'That railing is barely a suggestion at this point.' }, { who: 'Pindus', text: 'And I have a suggestion for what to do about it.' }]);
       } else {
         showDialogue(DLG.bridge_need_rope);
       }
@@ -422,8 +422,8 @@ const bridgeHotspots = [
     visible: () => state.flags.bridgeFloorFixed && state.flags.bridgeRailingFixed && !state.flags.bridgeGateOpen,
     onInteract() {
       showDialogue([
-        { who: 'Fetsson', text: 'The gate is padlocked from a chain connected to that counterweight mechanism.' },
-        { who: 'Pindus',  text: 'Solve the weight puzzle on the mechanism to release it!' },
+        { who: 'Fetsson', text: 'The gate is padlocked. The chain runs up to that mechanism on the cliff.' },
+        { who: 'Pindus',  text: 'Chains usually go slack when something heavy descends. That\'s gravity being sociable.' },
       ]);
     },
   },
@@ -460,9 +460,9 @@ const bridgeHotspots = [
 // ─────────────────────────────────────────────────────────────
 const waterfallHotspots = [
   {
-    id: 'waterfall_return',
+    id: 'waterfallReturn',
     label: '← Bridge',
-    x: 0, y: 200, w: 60, h: 240,
+    x: 0, y: 240, w: 90, h: 220,
     walkToX: 80,
     visible: () => true,
     onInteract() {
@@ -470,10 +470,10 @@ const waterfallHotspots = [
     },
   },
   {
-    id: 'torch_pickup',
+    id: 'torchPickup',
     label: 'Unlit Torch',
-    x: 610, y: 200, w: 40, h: 120,
-    walkToX: 590,
+    x: 490, y: 295, w: 60, h: 80,
+    walkToX: 520,
     visible: () => !state.flags.torchPickedUp,
     onInteract() {
       showDialogue(DLG.torch_pickup, () => {
@@ -485,8 +485,8 @@ const waterfallHotspots = [
   {
     id: 'campfire',
     label: 'Campfire',
-    x: 470, y: 330, w: 100, h: 80,
-    walkToX: 490,
+    x: 130, y: 358, w: 108, h: 68,
+    walkToX: 210,
     visible: () => true,
     onInteract() {
       if (state.selectedItem === 'torch' && !state.flags.torchLit) {
@@ -497,25 +497,25 @@ const waterfallHotspots = [
           deselectItem();
         });
       } else if (state.flags.torchLit) {
-        showDialogue([{ who: 'Fetsson', text: 'The campfire crackles. My torch is already lit.' }]);
+        showDialogue([{ who: 'Fetsson', text: 'The embers are still glowing. I have everything I need from here.' }]);
       } else if (state.flags.torchPickedUp) {
-        showDialogue([{ who: 'Fetsson', text: 'I should select the torch from my inventory and use it on the campfire.' }]);
+        showDialogue([{ who: 'Fetsson', text: 'The embers are still warm. And I have a torch.' }, { who: 'Pindus', text: 'Mm.' }]);
       } else {
         showDialogue(DLG.campfire_no_torch);
       }
     },
   },
   {
-    id: 'cave_entrance',
+    id: 'caveEntrance',
     label: 'Cave Entrance',
-    x: 100, y: 140, w: 160, h: 240,
-    walkToX: 170,
+    x: 585, y: 268, w: 150, h: 160,
+    walkToX: 620,
     visible: () => true,
     onInteract() {
       if (!state.flags.torchLit) {
         showDialogue(DLG.cave_dark);
       } else if (state.flags.caveCrossed) {
-        showDialogue([{ who: 'Pindus', text: 'We already crossed that cave. The orchard is the other way.' }]);
+        showDialogue([{ who: 'Pindus', text: 'We already crossed that cave. Lovely acoustics in there, but let\'s not go back.' }]);
       } else {
         showDialogue(DLG.stepping_stone_intro, () => {
           startMinigame(stonepathMinigame, () => {

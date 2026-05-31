@@ -40,9 +40,9 @@ js/
 │   ├── loop.js       ← update() + render() called via requestAnimationFrame
 │   └── minigame.js   ← minigame manager (startMinigame, endMinigame, etc.)
 ├── minigames/
-│   ├── counterweight.js ← stone-stacking puzzle (Bridge)
+│   ├── counterweight.js ← balance-scale puzzle (Bridge)
 │   ├── stonepath.js     ← stepping-stone cave puzzle (Waterfall)
-│   └── planklay.js      ← plank width-matching puzzle (Bridge floor)
+│   └── planklay.js      ← plank combination puzzle (Bridge floor): select planks that sum to each gap width
 └── render/
     ├── utils.js      ← gradientRect(), drawRoundRect()
     ├── shared.js     ← drawCloud(), drawTree()  — reused across scenes
@@ -241,9 +241,9 @@ Minigames are self-contained interactive puzzles that temporarily take over the 
 | File | Role |
 |---|---|
 | `js/engine/minigame.js` | Manager: `startMinigame(module, onDone)`, `endMinigame(success)`, `isMinigameActive()`, `updateMinigame()`, `renderMinigame(ctx)`, `handleMinigameClick(x, y)` |
-| `js/minigames/counterweight.js` | Counterweight stone-stacking puzzle (Bridge scene) |
+| `js/minigames/counterweight.js` | Balance-scale puzzle: place 8 weights on two pans to achieve equal totals (Bridge scene) |
 | `js/minigames/stonepath.js` | Cave stepping-stone puzzle (Waterfall scene) |
-| `js/minigames/planklay.js` | Plank width-matching puzzle (Bridge floor repair) |
+| `js/minigames/planklay.js` | Plank combination puzzle: select planks summing to each gap's required total width (Bridge floor repair) |
 
 ### Each minigame module must export
 ```js

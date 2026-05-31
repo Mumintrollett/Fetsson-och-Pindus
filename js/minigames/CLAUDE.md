@@ -6,9 +6,9 @@ Each minigame is a **self-contained ES module** that plugs into the minigame man
 
 | File | id | Scene | Puzzle |
 |---|---|---|---|
-| `counterweight.js` | `counterweight` | Bridge | Stack 4 stone weights heaviest→lightest (⭐4 > 🌙3 > ☀️2 > ☁️1) |
+| `counterweight.js` | `counterweight` | Bridge | Balance scale: place 8 stone weights (3,5,6,7,8,9,11,13) on two pans until both sides weigh 31 |
 | `stonepath.js` | `stonepath` | Waterfall / Cave | Read carved symbols above columns to find safe row; one wrong step resets |
-| `planklay.js` | `planklay` | Bridge floor | Match 3 planks by width label to 3 gaps in the bridge deck |
+| `planklay.js` | `planklay` | Bridge floor | Select groups of smaller planks that sum to each gap's total width (9 planks, 3 gaps, unique solution) |
 
 ---
 

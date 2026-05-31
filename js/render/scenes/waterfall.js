@@ -89,7 +89,7 @@ export function drawWaterfallScene(ctx) {
   _drawCampfire(ctx);
 
   // Torch bracket on cliff wall
-  if (!state.flags.torchFound) _drawTorchBracket(ctx, false);
+  if (!state.flags.torchPickedUp) _drawTorchBracket(ctx, false);
 
   // Cave entrance label + pindus hint arrow
   ctx.fillStyle = 'rgba(200,180,255,0.8)';
@@ -101,9 +101,9 @@ export function drawWaterfallScene(ctx) {
   // Hotspot highlights
   _highlight(ctx, state.hovered === 'waterfallReturn',  0,   240, 90,  220);
   _highlight(ctx, state.hovered === 'torchPickup'
-                  && !state.flags.torchFound,           502, 298, 54,  76);
+                  && !state.flags.torchPickedUp,        490, 295, 60,  80);
   _highlight(ctx, state.hovered === 'campfire',         130, 358, 108, 68);
-  _highlight(ctx, state.hovered === 'caveEntrance',     588, 270, 144, 162);
+  _highlight(ctx, state.hovered === 'caveEntrance',     585, 268, 150, 160);
 }
 
 // ── Private helpers ────────────────────────────────────────────────────────────
