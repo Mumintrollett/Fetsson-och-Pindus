@@ -3,7 +3,7 @@ import { FLOOR_Y } from './constants.js';
 // Central mutable game state.  All modules import this object and mutate it
 // in place so changes are immediately visible everywhere.
 export const state = {
-  scene: 'title',   // 'title' | 'barn' | 'farmyard' | 'garden' | 'kitchen'
+  scene: 'title',   // 'title'|'barn'|'farmyard'|'garden'|'kitchen'|'bridge'|'waterfall'|'appleorchard'
   tick: 0,
 
   player: {
@@ -33,6 +33,34 @@ export const state = {
     doorOpen:         false,
     gameFinished:     false,
     farmhouseShown:   false,
+
+    // Post-pancake / apple quest arc
+    pancakesEaten:      false,
+    appleQuestGiven:    false,
+    toolboxOpen:        false,
+
+    // Bridge
+    bridgeVisited:      false,
+    bridgePlanksGot:    false,
+    bridgeFloorFixed:   false,
+    bridgeRailingFixed: false,
+    bridgeRepaired:     false,
+
+    // Waterfall
+    waterfallVisited:   false,
+    torchFound:         false,
+    torchLit:           false,
+    waterfallCrossed:   false,
+
+    // Apple Orchard
+    orchardVisited:     false,
+    applesCollected:    false,
+    gameComplete:       false,
+  },
+
+  minigame: {           // minigame subsystem state
+    active: false,
+    id: null,
   },
 
   dlg: {                // dialogue subsystem state

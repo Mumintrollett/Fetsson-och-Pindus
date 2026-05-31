@@ -123,7 +123,7 @@ Each item is `{ id, name, icon }`. The inventory bar renders them automatically 
 
 `transitionTo(scene, startX, startY, facing)`:
 - Sets `state.scene`, repositions player and Pindus, clears tooltip and pending actions.
-- Triggers the `ending` dialogue automatically when entering `'kitchen'` for the first time.
+- Triggers arrival dialogues automatically for `'kitchen'`, `'bridge'`, `'waterfall'`, and `'appleorchard'`.
 
 To trigger scene-specific arrival dialogue for a new map, add a condition in `transitionTo`:
 ```js
@@ -172,11 +172,12 @@ mouse.x = (e.clientX - r.left) * (W / r.width);
 ```
 
 Click priority:
-1. Title screen — any click starts the game
-2. Active dialogue — any click advances it
-3. Inventory area (y > H−68) — ignored for world clicks
-4. Hotspot — walk to `walkToX`, then fire `onInteract`
-5. Ground (y between 360 and H−68) — walk to click position
+1. Active minigame — route to `handleMinigameClick`, nothing else fires
+2. Title screen — any click starts the game
+3. Active dialogue — any click advances it
+4. Inventory area (y > H−68) — ignored for world clicks
+5. Hotspot — walk to `walkToX`, then fire `onInteract`
+6. Ground (y between 360 and H−68) — walk to click position
 
 **When to use**: adding keyboard shortcuts, right-click context menus, drag-and-drop inventory, touch support.
 
@@ -196,3 +197,56 @@ Click priority:
 | New HUD element | `index.html`, `css/style.css`, optionally `js/engine/loop.js` |
 | New per-frame behaviour | `js/engine/loop.js` (`update()`) |
 | New input gesture | `js/engine/input.js` |
+| New minigame | `js/minigames/<name>.js`, launch via `startMinigame()` in a hotspot |
+
+---
+
+## 11. Minigames — `js/engine/minigame.js` + `js/minigames/`
+
+**Skill: Canvas 2D API; JavaScript state machines**
+
+Minigames are full-screen interactive puzzles launched from a hotspot. While active they suspend normal player movement and route all clicks through `handleMinigameClick`.
+
+### Existing minigames
+| File | Scene | Puzzle |
+|---|---|---|
+| `js/minigames/counterweight.js` | Bridge | Stack 4 stone weights heaviest → lightest (star 4 > moon 3 > sun 2 > cloud 1). Wrong order = shake + reset. |
+| `js/minigames/stonepath.js` | Waterfall/cave | Step across 4 columns of 3 stones. Each column has a carved symbol (Arch=mid, Peak=top, Bowl=bot, Diamond=mid). Wrong step = splash + reset. |
+
+### Creating a new minigame
+1. Create `js/minigames/myminigame.js`:
+```js
+import { endMinigame } from '../engine/minigame.js';
+
+export const id = 'myminigame';
+
+let _solved = false;
+
+export function reset() { _solved = false; }
+
+export function update() {
+  if (_solved) endMinigame(true);
+}
+
+export function handleClick(x, y) {
+  // process player input; set _solved = true when complete
+}
+
+export function render(ctx) {
+  // draw full-screen overlay (800×500)
+  // typically: dim background, draw puzzle elements, draw instructions
+}
+```
+
+2. Launch it from a hotspot in `js/data/hotspots.js`:
+```js
+import { startMinigame } from '../engine/minigame.js';
+import * as myMinigame from '../minigames/myminigame.js';
+
+// inside onInteract():
+startMinigame(myMinigame, () => {
+  state.flags.myPuzzleSolved = true;
+});
+```
+
+**When to use**: multi-step interactive puzzles that need their own input loop (stacking, pattern matching, timing challenges, etc.).

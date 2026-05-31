@@ -31,7 +31,11 @@ js/
 │   ├── inventory.js  ← addItem(), removeItem(), deselectItem(), renderInventory()
 │   ├── transitions.js← transitionTo(scene, startX, startY, facing)
 │   ├── input.js      ← mousemove + click handlers, hotspot hit-testing
-│   └── loop.js       ← update() + render() called via requestAnimationFrame
+│   ├── loop.js       ← update() + render() called via requestAnimationFrame
+│   └── minigame.js   ← minigame manager (startMinigame, endMinigame, etc.)
+├── minigames/
+│   ├── counterweight.js ← stone-stacking puzzle (Bridge)
+│   └── stonepath.js     ← stepping-stone cave puzzle (Waterfall)
 └── render/
     ├── utils.js      ← gradientRect(), drawRoundRect()
     ├── shared.js     ← drawCloud(), drawTree()  — reused across scenes
@@ -41,7 +45,10 @@ js/
         ├── barn.js
         ├── farmyard.js
         ├── garden.js
-        └── kitchen.js
+        ├── kitchen.js
+        ├── bridge.js
+        ├── waterfall.js
+        └── appleorchard.js
 ```
 
 ---
@@ -53,7 +60,7 @@ The single source of truth. Every module imports and mutates it in place.
 
 | Field | Type | Purpose |
 |---|---|---|
-| `state.scene` | string | Active scene key (`'title'`, `'barn'`, `'farmyard'`, `'garden'`, `'kitchen'`) |
+| `state.scene` | string | Active scene key (`'title'`, `'barn'`, `'farmyard'`, `'garden'`, `'kitchen'`, `'bridge'`, `'waterfall'`, `'appleorchard'`) |
 | `state.tick` | number | Frame counter, incremented each update |
 | `state.player` | object | `{x, y, facing, walking, targetX, pendingAction}` |
 | `state.pindus` | object | `{x, y, facing}` — companion, follows automatically |
@@ -63,8 +70,18 @@ The single source of truth. Every module imports and mutates it in place.
 | `state.dlg` | object | Dialogue subsystem: `{active, queue, onDone}` |
 | `state.hovered` | string\|null | Id of the hotspot currently under the mouse |
 
+| `state.minigame` | object | `{active, id}` — managed by `js/engine/minigame.js` |
+
 **Flags** (all boolean, default `false`):
+
+*Original arc:*
 `stickPickedUp`, `bucketPickedUp`, `bucketFilled`, `gateOpen`, `keyPickedUp`, `doorOpen`, `gameFinished`, `farmhouseShown`
+
+*Apple-quest arc:*
+`pancakesEaten`, `appleQuestGiven`, `toolboxOpen`, `barnCodeEntered`,
+`planksPickedUp`, `bridgeVisited`, `bridgeFloorFixed`, `bridgeRailingFixed`, `bridgeGateOpen`, `bridgeCrossed`,
+`torchPickedUp`, `torchLit`, `waterfallVisited`, `caveCrossed`,
+`orchardVisited`, `applesCollected`, `gameComplete`
 
 ### Item definition (`js/data/items.js`)
 ```js
@@ -206,3 +223,65 @@ showDialogue(DLG.some_lines, () => {
   transitionTo('nextscene', 100, FLOOR_Y, 1);
 });
 ```
+
+---
+
+## Minigame system
+
+Minigames are self-contained interactive puzzles that temporarily take over the screen.
+
+### Files
+| File | Role |
+|---|---|
+| `js/engine/minigame.js` | Manager: `startMinigame(module, onDone)`, `endMinigame(success)`, `isMinigameActive()`, `updateMinigame()`, `renderMinigame(ctx)`, `handleMinigameClick(x, y)` |
+| `js/minigames/counterweight.js` | Counterweight stone-stacking puzzle (Bridge scene) |
+| `js/minigames/stonepath.js` | Cave stepping-stone puzzle (Waterfall scene) |
+
+### Each minigame module must export
+```js
+export const id = 'myminigame';
+export function reset() { /* initialise state */ }
+export function update() { /* per-frame logic, call endMinigame(true) on completion */ }
+export function handleClick(x, y) { /* process click */ }
+export function render(ctx) { /* draw the full-screen overlay */ }
+```
+
+### Starting a minigame from a hotspot
+```js
+import { startMinigame } from '../engine/minigame.js';
+import * as myMinigame from '../minigames/myminigame.js';
+
+// Inside onInteract():
+startMinigame(myMinigame, () => {
+  // Runs after endMinigame(true) is called inside the minigame
+  state.flags.puzzleSolved = true;
+});
+```
+
+### Engine contract
+- While `state.minigame.active` is `true`, `loop.js` calls `updateMinigame()` instead of the normal player-movement update, and renders the minigame overlay on top of the scene.
+- `input.js` routes all clicks to `handleMinigameClick()` when a minigame is active.
+- Call `endMinigame(true)` on success to fire `onDone` and return to normal play.
+- Call `endMinigame(false)` to cancel without reward (e.g., player skips).
+
+---
+
+## Game arc (current)
+
+```
+Title → Barn → Farm Yard → Garden → Kitchen
+                                   ↓ (pancake push + apple quest)
+                     Farm Yard → Bridge → Waterfall → Apple Orchard
+                                                      ↓ (apples collected)
+                                               Farm Yard → Kitchen (game complete)
+```
+
+**Puzzles in order of difficulty:**
+1. Hay bale (trivial pick-up)
+2. Rusty gate — bucket → well → water on gate
+3. Hidden key — stick on garden gnome
+4. Bridge floor — planks (woodpile) + hammer (barn toolbox, code = 7)
+5. Bridge railing — rope (barn toolbox)
+6. Counterweight gate — stack 4 stones heaviest-to-lightest (star 4 > moon 3 > sun 2 > cloud 1)
+7. Cave stepping stones — read symbol above each column; Arch=mid, Peak=top, Bowl=bottom, Diamond=mid
+8. Apple harvest — select basket, use on trees

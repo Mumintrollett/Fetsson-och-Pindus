@@ -5,12 +5,20 @@ import { getHotspots }     from '../data/hotspots.js';
 import { transitionTo }    from './transitions.js';
 import { showDialogue }    from './dialogue.js';
 import { DLG }             from '../data/dialogue.js';
+import { isMinigameActive, handleMinigameClick } from './minigame.js';
 
 export function initInput(canvas) {
   canvas.addEventListener('mousemove', e => {
     const r  = canvas.getBoundingClientRect();
     mouse.x  = (e.clientX - r.left) * (W / r.width);
     mouse.y  = (e.clientY - r.top)  * (H / r.height);
+
+    // No hotspot highlighting during a minigame
+    if (isMinigameActive()) {
+      state.hovered = null;
+      canvas.style.cursor = 'default';
+      return;
+    }
 
     const hs = _hotspotAt(mouse.x, mouse.y);
     state.hovered = hs ? hs.id : null;
@@ -32,6 +40,12 @@ export function initInput(canvas) {
     const r   = canvas.getBoundingClientRect();
     const cx2 = (e.clientX - r.left) * (W / r.width);
     const cy2 = (e.clientY - r.top)  * (H / r.height);
+
+    // Route all clicks to active minigame
+    if (isMinigameActive()) {
+      handleMinigameClick(cx2, cy2);
+      return;
+    }
 
     // Title screen
     if (state.scene === 'title') {

@@ -18,6 +18,9 @@ export function drawKitchenScene(ctx) {
     ctx.fillStyle = '#8b6020'; ctx.fillRect(bx, 0, 20, 28);
   });
 
+  // Back door (left wall — exit to farm yard)
+  _drawKitchenDoor(ctx);
+
   // Window
   ctx.fillStyle = '#87ceeb'; ctx.fillRect(580, 60, 160, 120);
   gradientRect(ctx, 580, 140, 160, 40, 'rgba(255,200,80,0)', 'rgba(255,200,80,0.3)', true);
@@ -74,21 +77,12 @@ export function drawKitchenScene(ctx) {
   ctx.fillStyle = '#8b5c20';
   ctx.fillRect(290, 308, 16, 100); ctx.fillRect(614, 308, 16, 100);
 
-  // Pancake plate
-  ctx.fillStyle = '#f0ead8';
-  ctx.beginPath(); ctx.ellipse(380, 278, 50, 14, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.strokeStyle = '#c8b090'; ctx.lineWidth = 1; ctx.stroke();
-  ['#e8a840', '#e09830', '#d88820'].forEach((col, i) => {
-    ctx.fillStyle = col;
-    ctx.beginPath(); ctx.ellipse(380, 272 - i * 10, 36, 10, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = '#c07020'; ctx.lineWidth = 0.5; ctx.stroke();
-  });
-  ctx.strokeStyle = '#e8a020'; ctx.lineWidth = 3;
-  ctx.beginPath();
-  ctx.moveTo(360, 248);
-  ctx.bezierCurveTo(365, 254, 375, 260, 385, 256);
-  ctx.bezierCurveTo(390, 252, 385, 248, 380, 250);
-  ctx.stroke();
+  // Pancakes — on plate or splattered on floor
+  if (!state.flags.pancakesEaten) {
+    _drawPancakePlate(ctx);
+  } else {
+    _drawFallenPancakes(ctx);
+  }
 
   // Honey jar
   ctx.fillStyle = '#e8c020'; ctx.fillRect(448, 255, 30, 30);
@@ -123,4 +117,81 @@ export function drawKitchenScene(ctx) {
   ctx.moveTo(580,  60); ctx.lineTo(740,  60);
   ctx.lineTo(440, 360); ctx.lineTo(340, 360);
   ctx.closePath(); ctx.fill();
+
+  // Hotspot highlights
+  _highlight(ctx, state.hovered === 'kitchen_exit',  0,  250, 80, 165);
+  if (!state.flags.pancakesEaten) {
+    _highlight(ctx, state.hovered === 'pancakes', 320, 240, 200, 60);
+  }
+}
+
+// ── Private helpers ────────────────────────────────────────────────────────────
+
+function _drawKitchenDoor(ctx) {
+  ctx.fillStyle = '#c8a060';
+  ctx.fillRect(5, 252, 72, 162);
+  ctx.strokeStyle = '#8b5a20'; ctx.lineWidth = 2;
+  ctx.strokeRect(5, 252, 72, 162);
+  // Door panels
+  ctx.strokeStyle = '#a07840'; ctx.lineWidth = 1;
+  ctx.strokeRect(12, 260, 58, 60);
+  ctx.strokeRect(12, 330, 58, 76);
+  // Handle
+  ctx.fillStyle = '#c8c8c8';
+  ctx.beginPath(); ctx.arc(68, 344, 4, 0, Math.PI * 2); ctx.fill();
+  // Arrow hint
+  ctx.fillStyle = 'rgba(200,170,100,0.6)';
+  ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText('←', 41, 415);
+  ctx.textAlign = 'left';
+}
+
+function _drawPancakePlate(ctx) {
+  // Plate
+  ctx.fillStyle = '#f0ead8';
+  ctx.beginPath(); ctx.ellipse(380, 278, 50, 14, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#c8b090'; ctx.lineWidth = 1; ctx.stroke();
+  // Pancake stack
+  ['#e8a840', '#e09830', '#d88820'].forEach((col, i) => {
+    ctx.fillStyle = col;
+    ctx.beginPath(); ctx.ellipse(380, 272 - i * 10, 36, 10, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#c07020'; ctx.lineWidth = 0.5; ctx.stroke();
+  });
+  // Honey drizzle
+  ctx.strokeStyle = '#e8a020'; ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(360, 248);
+  ctx.bezierCurveTo(365, 254, 375, 260, 385, 256);
+  ctx.bezierCurveTo(390, 252, 385, 248, 380, 250);
+  ctx.stroke();
+}
+
+function _drawFallenPancakes(ctx) {
+  // Empty plate
+  ctx.fillStyle = '#f0ead8';
+  ctx.beginPath(); ctx.ellipse(380, 278, 50, 14, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#c8b090'; ctx.lineWidth = 1; ctx.stroke();
+  // Splattered pancakes on floor
+  const splatPositions = [[340, 370], [375, 385], [355, 400], [400, 375]];
+  splatPositions.forEach(([sx, sy], i) => {
+    ctx.fillStyle = ['#e8a840', '#e09830', '#d88820'][i % 3];
+    ctx.beginPath();
+    ctx.ellipse(sx, sy, 22 + i * 3, 6 + i, 0.3 * i, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#c07020'; ctx.lineWidth = 0.5; ctx.stroke();
+  });
+  // Honey pool
+  ctx.fillStyle = 'rgba(220,160,20,0.55)';
+  ctx.beginPath();
+  ctx.ellipse(370, 390, 35, 10, 0.2, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function _highlight(ctx, active, x, y, w, h) {
+  if (!active) return;
+  ctx.strokeStyle = 'rgba(255,220,60,0.7)';
+  ctx.lineWidth   = 2;
+  ctx.setLineDash([6, 4]);
+  ctx.strokeRect(x, y, w, h);
+  ctx.setLineDash([]);
 }

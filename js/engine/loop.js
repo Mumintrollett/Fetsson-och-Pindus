@@ -2,22 +2,36 @@ import { W, H, WALK_SPEED } from './constants.js';
 import { state, mouse }     from './state.js';
 import { ITEMS }            from '../data/items.js';
 
-import { drawTitleScreen }  from '../render/scenes/title.js';
-import { drawBarnScene }    from '../render/scenes/barn.js';
-import { drawFarmYardScene } from '../render/scenes/farmyard.js';
-import { drawGardenScene }  from '../render/scenes/garden.js';
-import { drawKitchenScene } from '../render/scenes/kitchen.js';
+import { drawTitleScreen }     from '../render/scenes/title.js';
+import { drawBarnScene }       from '../render/scenes/barn.js';
+import { drawFarmYardScene }   from '../render/scenes/farmyard.js';
+import { drawGardenScene }     from '../render/scenes/garden.js';
+import { drawKitchenScene }    from '../render/scenes/kitchen.js';
+import { drawBridgeScene }     from '../render/scenes/bridge.js';
+import { drawWaterfallScene }  from '../render/scenes/waterfall.js';
+import { drawAppleOrchardScene } from '../render/scenes/appleorchard.js';
 import { drawFetsson, drawPindus, drawMrsHen } from '../render/characters.js';
 
+import { isMinigameActive, updateMinigame, renderMinigame } from './minigame.js';
+
 const SCENE_NAMES = {
-  barn:     'The Barn',
-  farmyard: 'The Farm Yard',
-  garden:   'The Garden',
-  kitchen:  "Mrs. Hen's Kitchen",
+  barn:        'The Barn',
+  farmyard:    'The Farm Yard',
+  garden:      'The Garden',
+  kitchen:     "Mrs. Hen's Kitchen",
+  bridge:      'The Old Bridge',
+  waterfall:   'Mossfall Grotto',
+  appleorchard: 'The Apple Orchard',
 };
 
 export function update() {
   state.tick++;
+
+  // Minigame takes full control while active
+  if (isMinigameActive()) {
+    updateMinigame();
+    return;
+  }
 
   // Move player toward targetX
   const p = state.player;
@@ -55,10 +69,13 @@ export function render(ctx) {
 
   // Background
   switch (state.scene) {
-    case 'barn':     drawBarnScene(ctx);     break;
-    case 'farmyard': drawFarmYardScene(ctx); break;
-    case 'garden':   drawGardenScene(ctx);   break;
-    case 'kitchen':  drawKitchenScene(ctx);  break;
+    case 'barn':         drawBarnScene(ctx);          break;
+    case 'farmyard':     drawFarmYardScene(ctx);       break;
+    case 'garden':       drawGardenScene(ctx);         break;
+    case 'kitchen':      drawKitchenScene(ctx);        break;
+    case 'bridge':       drawBridgeScene(ctx);         break;
+    case 'waterfall':    drawWaterfallScene(ctx);      break;
+    case 'appleorchard': drawAppleOrchardScene(ctx);   break;
   }
 
   // Walk animation frame (0 when standing still)
@@ -68,6 +85,11 @@ export function render(ctx) {
   drawFetsson(ctx, state.player.x,  state.player.y  - 20, state.player.facing, walkFrame);
 
   if (state.scene === 'kitchen') drawMrsHen(ctx, 550, 370);
+
+  // Minigame overlay (drawn on top of everything)
+  if (isMinigameActive()) {
+    renderMinigame(ctx);
+  }
 
   // Cursor item icon when hovering a hotspot with a selected item
   if (state.selectedItem && state.hovered) {

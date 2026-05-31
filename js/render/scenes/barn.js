@@ -84,8 +84,12 @@ export function drawBarnScene(ctx) {
   drawHayBale(ctx, 70,  350, !state.flags.stickPickedUp);
   drawHayBale(ctx, 520, 360, false);
 
+  // Toolbox (only relevant after apple quest)
+  _drawToolbox(ctx);
+
   // Hotspot highlights
   _highlight(ctx, state.hovered === 'hay_bale',      40,  330, 160,  80);
+  _highlight(ctx, state.hovered === 'toolbox',       535, 348, 88,   56);
   _highlight(ctx, state.hovered === 'barn_door_exit', 630, 50, 170, 340);
 }
 
@@ -109,6 +113,46 @@ export function drawHayBale(ctx, x, y, hasStick) {
     ctx.moveTo(x + 70, y - 20); ctx.lineTo(x + 80, y + 10);
     ctx.stroke();
     ctx.lineCap = 'butt';
+  }
+}
+
+function _drawToolbox(ctx) {
+  const tx = 537;
+  const ty = 350;
+  const open = state.flags.toolboxOpen;
+  // Chest body
+  ctx.fillStyle = '#7a4820';
+  ctx.fillRect(tx, ty + 8, 84, 46);
+  ctx.strokeStyle = '#4a2808'; ctx.lineWidth = 1.5;
+  ctx.strokeRect(tx, ty + 8, 84, 46);
+  // Metal corners
+  ctx.fillStyle = '#909090';
+  [[tx, ty + 8], [tx + 76, ty + 8], [tx, ty + 46], [tx + 76, ty + 46]]
+    .forEach(([cx2, cy2]) => ctx.fillRect(cx2, cy2, 8, 8));
+  // Lid
+  if (!open) {
+    ctx.fillStyle = '#8b5420';
+    ctx.fillRect(tx, ty, 84, 14);
+    ctx.strokeStyle = '#4a2808'; ctx.lineWidth = 1.5;
+    ctx.strokeRect(tx, ty, 84, 14);
+    // Lock
+    ctx.fillStyle = '#c0a020';
+    ctx.beginPath(); ctx.arc(tx + 42, ty + 7, 5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#806010';
+    ctx.fillRect(tx + 38, ty + 7, 8, 6);
+  } else {
+    // Open lid tilted back
+    ctx.save();
+    ctx.translate(tx + 42, ty + 8);
+    ctx.rotate(-0.8);
+    ctx.fillStyle = '#8b5420';
+    ctx.fillRect(-42, -14, 84, 14);
+    ctx.strokeStyle = '#4a2808'; ctx.lineWidth = 1.5;
+    ctx.strokeRect(-42, -14, 84, 14);
+    ctx.restore();
+    // Interior
+    ctx.fillStyle = '#2a1808';
+    ctx.fillRect(tx + 2, ty + 10, 80, 42);
   }
 }
 

@@ -227,6 +227,26 @@ export function drawFarmYardScene(ctx) {
   // Trees
   drawTree(ctx, 390, 260, 0.8);
   drawTree(ctx, 680, 240, 0.7);
+
+  // North path to bridge (visible after apple quest given)
+  if (state.flags.appleQuestGiven) {
+    // Dirt path leading off the top
+    ctx.fillStyle = '#b89050';
+    ctx.beginPath();
+    ctx.moveTo(360, 200); ctx.lineTo(380, 0);
+    ctx.lineTo(450, 0);   ctx.lineTo(460, 200);
+    ctx.closePath(); ctx.fill();
+    // Signpost
+    ctx.fillStyle = '#a07830'; ctx.fillRect(398, 155, 8, 55);
+    ctx.fillStyle = '#c8a060'; ctx.fillRect(385, 148, 60, 18);
+    ctx.strokeStyle = '#7a5010'; ctx.lineWidth = 1.5;
+    ctx.strokeRect(385, 148, 60, 18);
+    ctx.fillStyle = '#3a1808'; ctx.font = 'bold 9px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Orchard →', 415, 161);
+    ctx.textAlign = 'left';
+    _highlight(ctx, state.hovered === 'north_exit', 355, 0, 110, 205);
+  }
 }
 
 function _highlight(ctx, active, x, y, w, h) {

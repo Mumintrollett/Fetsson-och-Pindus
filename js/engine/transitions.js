@@ -27,4 +27,24 @@ export function transitionTo(scene, startX, startY, facing) {
     state.flags.gameFinished = true;
     setTimeout(() => showDialogue(DLG.ending), 600);
   }
+
+  if (scene === 'kitchen' && state.flags.applesCollected && !state.flags.gameComplete) {
+    state.flags.gameComplete = true;
+    setTimeout(() => showDialogue(DLG.game_complete), 600);
+  }
+
+  if (scene === 'bridge' && !state.flags.bridgeVisited) {
+    state.flags.bridgeVisited = true;
+    setTimeout(() => showDialogue(DLG.bridge_intro), 600);
+  }
+
+  if (scene === 'waterfall' && !state.flags.waterfallVisited) {
+    state.flags.waterfallVisited = true;
+    setTimeout(() => showDialogue(DLG.waterfall_intro), 600);
+  }
+
+  if (scene === 'appleorchard' && !state.flags.orchardVisited) {
+    state.flags.orchardVisited = true;
+    setTimeout(() => showDialogue(DLG.orchard_intro), 600);
+  }
 }
