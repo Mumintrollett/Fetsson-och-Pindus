@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fetsson och Pindus</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐷</text></svg>" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="game-wrapper">
+    <div id="game-container">
+      <canvas id="gameCanvas" width="800" height="500"></canvas>
+
+      <!-- Inventory bar (bottom) -->
+      <div id="inventory-bar">
+        <span id="inventory-label">Inventory</span>
+        <div id="inventory-slots"></div>
+      </div>
+
+      <!-- Dialogue box (above inventory) -->
+      <div id="dialogue-box" class="hidden">
+        <div id="dialogue-speaker"></div>
+        <div id="dialogue-text"></div>
+        <div id="dialogue-hint">Click to continue ▾</div>
+      </div>
+
+      <!-- Hover tooltip -->
+      <div id="tooltip" class="hidden"></div>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
