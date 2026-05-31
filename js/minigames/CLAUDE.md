@@ -9,6 +9,7 @@ Each minigame is a **self-contained ES module** that plugs into the minigame man
 | `counterweight.js` | `counterweight` | Bridge | Balance scale: place 8 stone weights (3,5,6,7,8,9,11,13) on two pans until both sides weigh 31 |
 | `stonepath.js` | `stonepath` | Waterfall / Cave | Read carved symbols above columns to find safe row; one wrong step resets |
 | `planklay.js` | `planklay` | Bridge floor | Select groups of smaller planks that sum to each gap's total width (9 planks, 3 gaps, unique solution) |
+| `clockpuzzle.js` | `clockpuzzle` | Workshop | Set three analog clock dials to the correct hours [7, 12, 5]; clues spread across three notes in the workshop |
 
 ---
 

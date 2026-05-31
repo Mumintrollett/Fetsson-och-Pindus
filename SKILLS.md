@@ -123,7 +123,7 @@ Each item is `{ id, name, icon }`. The inventory bar renders them automatically 
 
 `transitionTo(scene, startX, startY, facing)`:
 - Sets `state.scene`, repositions player and Pindus, clears tooltip and pending actions.
-- Triggers arrival dialogues automatically for `'kitchen'`, `'bridge'`, `'waterfall'`, and `'appleorchard'`.
+- Triggers arrival dialogues automatically for `'kitchen'`, `'bridge'`, `'waterfall'`, `'appleorchard'`, `'citygate'`, `'marketplace'`, and `'workshop'`.
 
 To trigger scene-specific arrival dialogue for a new map, add a condition in `transitionTo`:
 ```js

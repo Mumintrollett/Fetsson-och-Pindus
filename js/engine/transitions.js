@@ -30,7 +30,24 @@ export function transitionTo(scene, startX, startY, facing) {
 
   if (scene === 'kitchen' && state.flags.applesCollected && !state.flags.gameComplete) {
     state.flags.gameComplete = true;
-    setTimeout(() => showDialogue(DLG.game_complete), 600);
+    setTimeout(() => showDialogue(DLG.game_complete, () => {
+      setTimeout(() => showDialogue(DLG.scarecrow_acting_weird), 500);
+    }), 600);
+  }
+
+  if (scene === 'citygate' && !state.flags.citygateVisited) {
+    state.flags.citygateVisited = true;
+    setTimeout(() => showDialogue(DLG.citygate_intro), 600);
+  }
+
+  if (scene === 'marketplace' && !state.flags.marketplaceVisited) {
+    state.flags.marketplaceVisited = true;
+    setTimeout(() => showDialogue(DLG.marketplace_intro), 600);
+  }
+
+  if (scene === 'workshop' && !state.flags.workshopVisited) {
+    state.flags.workshopVisited = true;
+    setTimeout(() => showDialogue(DLG.workshop_enter), 600);
   }
 
   if (scene === 'bridge' && !state.flags.bridgeVisited) {

@@ -55,7 +55,10 @@ js/
         ├── kitchen.js
         ├── bridge.js
         ├── waterfall.js
-        └── appleorchard.js
+        ├── appleorchard.js
+        ├── citygate.js
+        ├── marketplace.js
+        └── workshop.js
 ```
 
 ---
@@ -89,6 +92,12 @@ The single source of truth. Every module imports and mutates it in place.
 `planksPickedUp`, `bridgeVisited`, `bridgeFloorFixed`, `bridgeRailingFixed`, `bridgeGateOpen`, `bridgeCrossed`,
 `torchPickedUp`, `torchLit`, `waterfallVisited`, `caveCrossed`,
 `orchardVisited`, `applesCollected`, `gameComplete`
+
+*Algott/city arc:*
+`scarecrowWeirdTalked`, `scarecrowQuestGiven`, `citygateVisited`, `citygateOpen`,
+`marketplaceVisited`, `birgerInfoGiven`, `workshopVisited`,
+`workshopNote1Read`, `workshopNote2Read`, `workshopNote3Read`,
+`watchFound`, `algottQuestDone`
 
 ### Item definition (`js/data/items.js`)
 ```js
@@ -244,6 +253,7 @@ Minigames are self-contained interactive puzzles that temporarily take over the 
 | `js/minigames/counterweight.js` | Balance-scale puzzle: place 8 weights on two pans to achieve equal totals (Bridge scene) |
 | `js/minigames/stonepath.js` | Cave stepping-stone puzzle (Waterfall scene) |
 | `js/minigames/planklay.js` | Plank combination puzzle: select planks summing to each gap's required total width (Bridge floor repair) |
+| `js/minigames/clockpuzzle.js` | Clock dial puzzle: set three analog clocks to correct hours [7, 12, 5] (Workshop scene) |
 
 ### Each minigame module must export
 ```js
@@ -281,15 +291,39 @@ Title → Barn → Farm Yard → Garden → Kitchen
                                    ↓ (pancake push + apple quest)
                      Farm Yard → Bridge → Waterfall → Apple Orchard
                                                       ↓ (apples collected)
-                                               Farm Yard → Kitchen (game complete)
+                                               Farm Yard → Kitchen (gameComplete)
+                                                      ↓ (scarecrow acting weird)
+                                               Farm Yard → City Gate → Market Square
+                                                                       ↓ (Birger trade)
+                                                               Workshop (clock puzzle)
+                                                                       ↓ (watch found)
+                                                          Farm Yard → Algott → (quest done)
 ```
 
 **Puzzles in order of difficulty:**
 1. Hay bale (trivial pick-up)
 2. Rusty gate — bucket → well → water on gate
 3. Hidden key — stick on garden gnome
-4. Bridge floor — **Plank Minigame**: pick up planks from woodpile + get hammer from barn toolbox (code = 7); match 3 planks by width label to 3 gaps in the deck
-5. Bridge railing — rope (barn toolbox) + select from inventory → use on railing
-6. Counterweight gate — stack 4 stones heaviest-to-lightest (star 4 > moon 3 > sun 2 > cloud 1)
-7. Cave stepping stones — read symbol above each column; Arch=mid, Peak=top, Bowl=bottom, Diamond=mid
-8. Apple harvest — select basket, use on trees
+4. Pancake push — stick on pancake plate → eat → Mrs. Hen quest
+5. Barn toolbox — remember code "7" from Mrs. Hen → unlock hammer + rope
+6. Bridge floor — **Plank Minigame**: 9 planks (8–28 cm), 3 gaps (36/54/72 cm); select groups summing to each gap's total; only one valid partition
+7. Bridge railing — rope from inventory → use on fraying railing
+8. Counterweight gate — **Balance Minigame**: place 8 stone weights (3,5,6,7,8,9,11,13 kg) on two pans to reach 31 kg each
+9. Cave stepping stones — **Stonepath Minigame**: read carved symbol above each column for safe row; no explicit key given
+10. Apple harvest — select basket, use on trees
+11. City gate latch — use stick on visible latch gap
+12. Birger's trade — give apples to Birger for workshop access info
+13. Workshop clock panel — **Clock Minigame**: set three clock dials to 7/12/5 (read from three notes around the workshop)
+
+**New flags (Algott/city arc):**
+`scarecrowWeirdTalked`, `scarecrowQuestGiven`, `citygateVisited`, `citygateOpen`,
+`marketplaceVisited`, `birgerInfoGiven`, `workshopVisited`,
+`workshopNote1Read`, `workshopNote2Read`, `workshopNote3Read`,
+`watchFound`, `algottQuestDone`
+
+**New item:** `pocketwatch` (⌚) — retrieved from Algott's hidden workshop panel; returned to Algott in the farm yard.
+
+**New minigame:** `js/minigames/clockpuzzle.js` — Three analog clock faces; click upper/lower half to ±1 hour; solution [7, 12, 5]; wrong = shake + reset to [12,12,12]; Leave button available.
+
+**New scenes:** `citygate`, `marketplace`, `workshop` — registered in `SCENE_HOTSPOTS` and `SCENE_NAMES`.
+

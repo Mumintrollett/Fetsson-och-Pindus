@@ -3,7 +3,7 @@ import { FLOOR_Y } from './constants.js';
 // Central mutable game state.  All modules import this object and mutate it
 // in place so changes are immediately visible everywhere.
 export const state = {
-  scene: 'title',   // 'title'|'barn'|'farmyard'|'garden'|'kitchen'|'bridge'|'waterfall'|'appleorchard'
+  scene: 'title',   // 'title'|'barn'|'farmyard'|'garden'|'kitchen'|'bridge'|'waterfall'|'appleorchard'|'citygate'|'marketplace'|'workshop'
   tick: 0,
 
   player: {
@@ -58,6 +58,28 @@ export const state = {
     orchardVisited:     false,
     applesCollected:    false,
     gameComplete:       false,
+
+    // Scarecrow / Algott arc
+    scarecrowWeirdTalked: false,
+    scarecrowQuestGiven:  false,
+
+    // City Gate
+    citygateVisited:    false,
+    citygateOpen:       false,
+
+    // Marketplace
+    marketplaceVisited: false,
+    birgerInfoGiven:    false,
+
+    // Workshop
+    workshopVisited:    false,
+    workshopNote1Read:  false,
+    workshopNote2Read:  false,
+    workshopNote3Read:  false,
+    watchFound:         false,
+
+    // Quest resolution
+    algottQuestDone:    false,
   },
 
   minigame: {           // minigame subsystem state

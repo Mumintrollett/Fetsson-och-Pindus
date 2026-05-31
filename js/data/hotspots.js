@@ -20,6 +20,7 @@ import { startMinigame } from '../engine/minigame.js';
 import * as counterweightMinigame from '../minigames/counterweight.js';
 import * as stonepathMinigame     from '../minigames/stonepath.js';
 import * as plankMinigame         from '../minigames/planklay.js';
+import * as clockpuzzleMinigame   from '../minigames/clockpuzzle.js';
 
 // ─────────────────────────────────────────────────────────────
 // SCENE: BARN
@@ -193,7 +194,44 @@ const farmyardHotspots = [
     walkToX: 560,
     visible: () => true,
     onInteract() {
-      showDialogue(DLG.scarecrow);
+      if (state.flags.algottQuestDone) {
+        showDialogue(DLG.algott_done);
+      } else if (state.flags.watchFound) {
+        // Player has watch but hasn't had the return dialogue yet
+        showDialogue(DLG.algott_return, () => {
+          state.flags.algottQuestDone = true;
+          removeItem('pocketwatch');
+          deselectItem();
+        });
+      } else if (state.flags.scarecrowQuestGiven) {
+        showDialogue(DLG.scarecrow_reminder);
+      } else if (state.flags.gameComplete && !state.flags.scarecrowWeirdTalked) {
+        state.flags.scarecrowWeirdTalked = true;
+        showDialogue(DLG.scarecrow_weird_state, () => {
+          showDialogue(DLG.scarecrow_backstory, () => {
+            showDialogue(DLG.scarecrow_quest, () => {
+              state.flags.scarecrowQuestGiven = true;
+            });
+          });
+        });
+      } else if (state.flags.gameComplete) {
+        // Already heard backstory but quest not yet given (shouldn't normally happen)
+        showDialogue(DLG.scarecrow_quest, () => {
+          state.flags.scarecrowQuestGiven = true;
+        });
+      } else {
+        showDialogue(DLG.scarecrow);
+      }
+    },
+  },
+  {
+    id: 'city_road',
+    label: 'Road to Town ↓',
+    x: 330, y: 420, w: 140, h: 80,
+    walkToX: 400,
+    visible: () => state.flags.scarecrowQuestGiven,
+    onInteract() {
+      transitionTo('citygate', 400, FLOOR_Y, 1);
     },
   },
   {
@@ -586,6 +624,242 @@ const appleOrchardHotspots = [
 ];
 
 // ─────────────────────────────────────────────────────────────
+// SCENE: CITY GATE
+// ─────────────────────────────────────────────────────────────
+const citygateHotspots = [
+  {
+    id: 'citygate_return',
+    label: '← Back to Farm',
+    x: 0, y: 280, w: 80, h: 170,
+    walkToX: 80,
+    visible: () => true,
+    onInteract() {
+      transitionTo('farmyard', 400, FLOOR_Y, -1);
+    },
+  },
+  {
+    id: 'sleeping_guard',
+    label: 'Sleeping Guard',
+    x: 620, y: 300, w: 110, h: 140,
+    walkToX: 600,
+    visible: () => true,
+    onInteract() {
+      showDialogue(DLG.sleeping_guard);
+    },
+  },
+  {
+    id: 'gate_notice',
+    label: 'Notice Board',
+    x: 60, y: 290, w: 80, h: 100,
+    walkToX: 120,
+    visible: () => true,
+    onInteract() {
+      showDialogue(DLG.gate_notice);
+    },
+  },
+  {
+    id: 'gate_latch_gap',
+    get label() {
+      return state.flags.citygateOpen ? 'City Gate (Open)' : 'City Gate (Latched)';
+    },
+    x: 230, y: 200, w: 340, h: 260,
+    walkToX: 310,
+    visible: () => !state.flags.citygateOpen,
+    onInteract() {
+      if (state.selectedItem === 'stick') {
+        showDialogue(DLG.gate_latch_success, () => {
+          state.flags.citygateOpen = true;
+          deselectItem();
+        });
+      } else {
+        showDialogue(DLG.gate_examine);
+      }
+    },
+  },
+  {
+    id: 'citygate_enter',
+    label: 'Enter City →',
+    x: 230, y: 200, w: 340, h: 260,
+    walkToX: 400,
+    visible: () => state.flags.citygateOpen,
+    onInteract() {
+      transitionTo('marketplace', 80, FLOOR_Y, 1);
+    },
+  },
+];
+
+// ─────────────────────────────────────────────────────────────
+// SCENE: MARKETPLACE
+// ─────────────────────────────────────────────────────────────
+const marketplaceHotspots = [
+  {
+    id: 'marketplace_return',
+    label: '← City Gate',
+    x: 0, y: 280, w: 80, h: 170,
+    walkToX: 80,
+    visible: () => true,
+    onInteract() {
+      transitionTo('citygate', 700, FLOOR_Y, -1);
+    },
+  },
+  {
+    id: 'fountain',
+    label: 'Fountain',
+    x: 330, y: 290, w: 140, h: 140,
+    walkToX: 370,
+    visible: () => true,
+    onInteract() {
+      showDialogue(DLG.fountain);
+    },
+  },
+  {
+    id: 'birger_stall',
+    label: "Birger's Stall",
+    x: 530, y: 260, w: 220, h: 190,
+    walkToX: 570,
+    visible: () => true,
+    onInteract() {
+      if (state.flags.birgerInfoGiven) {
+        showDialogue(DLG.birger_after_trade);
+      } else if (!state.flags.scarecrowQuestGiven) {
+        showDialogue([
+          { who: 'Birger', text: 'Good afternoon. Looking for anything in particular?' },
+          { who: 'Fetsson', text: "We're just passing through." },
+        ]);
+      } else if (state.selectedItem === 'apples') {
+        showDialogue(DLG.birger_greeting, () => {
+          showDialogue(DLG.birger_trade, () => {
+            state.flags.birgerInfoGiven = true;
+            removeItem('apples');
+            deselectItem();
+          });
+        });
+      } else if (state.inventory.includes('apples')) {
+        showDialogue(DLG.birger_greeting, () => {
+          showDialogue(DLG.birger_no_apples);
+        });
+      } else {
+        showDialogue(DLG.birger_greeting, () => {
+          showDialogue([
+            { who: 'Birger', text: "Anything that helps old Algott, I'll do. What do you need?" },
+            { who: 'Fetsson', text: "We need to get into his old workshop." },
+            { who: 'Birger', text: "Torsten never changes the back door lock. Just walk in. His notes are all over the workshop — look around carefully." },
+          ], () => {
+            state.flags.birgerInfoGiven = true;
+          });
+        });
+      }
+    },
+  },
+  {
+    id: 'workshop_path',
+    label: 'Gearsmith Street →',
+    x: 720, y: 250, w: 80, h: 200,
+    walkToX: 700,
+    visible: () => state.flags.birgerInfoGiven,
+    onInteract() {
+      transitionTo('workshop', 80, FLOOR_Y, 1);
+    },
+  },
+];
+
+// ─────────────────────────────────────────────────────────────
+// SCENE: WORKSHOP
+// ─────────────────────────────────────────────────────────────
+const workshopHotspots = [
+  {
+    id: 'workshop_return',
+    label: '← Market Square',
+    x: 0, y: 280, w: 80, h: 170,
+    walkToX: 80,
+    visible: () => true,
+    onInteract() {
+      transitionTo('marketplace', 700, FLOOR_Y, -1);
+    },
+  },
+  {
+    id: 'sausages',
+    label: 'Hanging Sausages',
+    x: 300, y: 60, w: 240, h: 120,
+    walkToX: 420,
+    visible: () => true,
+    onInteract() {
+      showDialogue(DLG.sausages_flavor);
+    },
+  },
+  {
+    id: 'workshop_note1',
+    label: "Algott's Note (Wall)",
+    x: 60, y: 220, w: 120, h: 90,
+    walkToX: 130,
+    visible: () => !state.flags.watchFound,
+    onInteract() {
+      state.flags.workshopNote1Read = true;
+      showDialogue(DLG.workshop_note1);
+    },
+  },
+  {
+    id: 'workshop_note2',
+    label: "Inscription (Workbench)",
+    x: 250, y: 310, w: 300, h: 50,
+    walkToX: 380,
+    visible: () => !state.flags.watchFound,
+    onInteract() {
+      state.flags.workshopNote2Read = true;
+      showDialogue(DLG.workshop_note2);
+    },
+  },
+  {
+    id: 'workshop_note3',
+    label: "Algott's Letter (Wall)",
+    x: 600, y: 230, w: 130, h: 100,
+    walkToX: 640,
+    visible: () => !state.flags.watchFound,
+    onInteract() {
+      state.flags.workshopNote3Read = true;
+      showDialogue(DLG.workshop_note3);
+    },
+  },
+  {
+    id: 'clock_shelf',
+    get label() {
+      return state.flags.watchFound ? 'Open Panel (Empty)' : 'Clock Shelf';
+    },
+    x: 50, y: 140, w: 190, h: 160,
+    walkToX: 130,
+    visible: () => true,
+    onInteract() {
+      if (state.flags.watchFound) {
+        showDialogue(DLG.watch_already_found);
+        return;
+      }
+      const notesRead = state.flags.workshopNote1Read ||
+                        state.flags.workshopNote2Read ||
+                        state.flags.workshopNote3Read;
+      const intro = notesRead ? DLG.workshop_clock_shelf : DLG.workshop_clock_shelf_no_notes;
+      showDialogue(intro, () => {
+        startMinigame(clockpuzzleMinigame, () => {
+          state.flags.watchFound = true;
+          showDialogue(DLG.clock_success, () => {
+            addItem('pocketwatch');
+          });
+        });
+      });
+    },
+  },
+  {
+    id: 'workshop_exit_return',
+    label: '← Return to Algott',
+    x: 720, y: 280, w: 80, h: 170,
+    walkToX: 700,
+    visible: () => state.flags.watchFound,
+    onInteract() {
+      transitionTo('farmyard', 560, FLOOR_Y, -1);
+    },
+  },
+];
+
+// ─────────────────────────────────────────────────────────────
 // Registry — add new scenes here as the game grows
 // ─────────────────────────────────────────────────────────────
 const SCENE_HOTSPOTS = {
@@ -596,6 +870,9 @@ const SCENE_HOTSPOTS = {
   bridge:      bridgeHotspots,
   waterfall:   waterfallHotspots,
   appleorchard: appleOrchardHotspots,
+  citygate:    citygateHotspots,
+  marketplace: marketplaceHotspots,
+  workshop:    workshopHotspots,
 };
 
 export function getHotspots() {

@@ -160,8 +160,13 @@ export function drawFarmYardScene(ctx) {
   _highlight(ctx, state.hovered === 'bucket_pickup', 474, 335,  35,  35);
 
   // ── SCARECROW ───────────────────────────────────────────────
+  // Determine visual state
+  const weirdState = state.flags.gameComplete && !state.flags.algottQuestDone;
+  const questDone  = state.flags.algottQuestDone;
+  const CX = 600; // scarecrow center x
+
   ctx.strokeStyle = '#8b6020'; ctx.lineWidth = 5; ctx.lineCap = 'round';
-  ctx.beginPath(); ctx.moveTo(600, 360); ctx.lineTo(600, 240); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(CX, 360); ctx.lineTo(CX, 240); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(560, 280); ctx.lineTo(640, 280); ctx.stroke();
   ctx.lineCap = 'butt';
   ctx.fillStyle = '#8b6914';
@@ -170,14 +175,16 @@ export function drawFarmYardScene(ctx) {
   ctx.strokeRect(582, 255, 36, 60);
   ctx.fillStyle = '#c08030';
   ctx.fillRect(584, 278, 14, 12); ctx.fillRect(602, 295, 10, 10);
-  ctx.beginPath(); ctx.arc(600, 248, 18, 0, Math.PI * 2);
+  ctx.beginPath(); ctx.arc(CX, 248, 18, 0, Math.PI * 2);
   ctx.fillStyle = '#d4a830'; ctx.fill();
   ctx.strokeStyle = '#a07820'; ctx.lineWidth = 1; ctx.stroke();
   ctx.fillStyle = '#4a3010';
   ctx.fillRect(584, 226, 32, 6); ctx.fillRect(589, 212, 22, 16);
+  // Eyes — shift left when in weird (watching-kitchen) state
+  const eyeShift = weirdState ? -4 : 0;
   ctx.fillStyle = '#3a2010';
-  ctx.beginPath(); ctx.arc(594, 248, 2.5, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.arc(606, 248, 2.5, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(594 + eyeShift, 248, 2.5, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(606 + eyeShift, 248, 2.5, 0, Math.PI * 2); ctx.fill();
   ctx.strokeStyle = '#3a2010'; ctx.lineWidth = 1.5;
   ctx.beginPath();
   ctx.moveTo(594, 254); ctx.lineTo(598, 258); ctx.lineTo(602, 253); ctx.lineTo(606, 257);
@@ -188,6 +195,18 @@ export function drawFarmYardScene(ctx) {
       ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(sx + i * 10, sy + 14); ctx.stroke();
     }
   });
+  // Pocket watch hanging from post after quest complete
+  if (questDone) {
+    ctx.strokeStyle = '#c0a020'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(562, 284); ctx.lineTo(558, 300); ctx.stroke();
+    ctx.beginPath(); ctx.arc(558, 308, 8, 0, Math.PI * 2);
+    ctx.fillStyle = '#d4b840'; ctx.fill();
+    ctx.strokeStyle = '#a07820'; ctx.lineWidth = 1; ctx.stroke();
+    // Watch hands
+    ctx.strokeStyle = '#3a2010'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(558, 308); ctx.lineTo(558, 302); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(558, 308); ctx.lineTo(563, 308); ctx.stroke();
+  }
 
   _highlight(ctx, state.hovered === 'scarecrow', 578, 224, 44, 140);
 
@@ -246,6 +265,29 @@ export function drawFarmYardScene(ctx) {
     ctx.fillText('Orchard →', 415, 161);
     ctx.textAlign = 'left';
     _highlight(ctx, state.hovered === 'north_exit', 355, 0, 110, 205);
+  }
+
+  // South road to Varnholm (visible after scarecrow gives quest)
+  if (state.flags.scarecrowQuestGiven) {
+    ctx.fillStyle = '#b89050';
+    ctx.beginPath();
+    ctx.moveTo(340, 420); ctx.lineTo(360, 500);
+    ctx.lineTo(450, 500); ctx.lineTo(460, 420);
+    ctx.closePath(); ctx.fill();
+    // Wheel ruts
+    ctx.strokeStyle = '#a07840'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(370, 420); ctx.lineTo(375, 500); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(440, 420); ctx.lineTo(435, 500); ctx.stroke();
+    // Signpost
+    ctx.fillStyle = '#a07830'; ctx.fillRect(398, 400, 8, 26);
+    ctx.fillStyle = '#c8a060'; ctx.fillRect(382, 390, 72, 18);
+    ctx.strokeStyle = '#7a5010'; ctx.lineWidth = 1.5;
+    ctx.strokeRect(382, 390, 72, 18);
+    ctx.fillStyle = '#3a1808'; ctx.font = 'bold 9px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Varnholm ↓', 418, 403);
+    ctx.textAlign = 'left';
+    _highlight(ctx, state.hovered === 'city_road', 330, 420, 140, 80);
   }
 }
 

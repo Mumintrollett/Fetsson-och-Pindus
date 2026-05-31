@@ -12,4 +12,5 @@ export const ITEMS = {
   litTorch:    { id: 'litTorch',    name: 'Lit Torch',  icon: '🔥' },
   basket:      { id: 'basket',      name: 'Basket',     icon: '🧺' },
   apples:      { id: 'apples',      name: 'Apples',     icon: '🍎' },
+  pocketwatch: { id: 'pocketwatch', name: "Algott's Watch", icon: '⌚' },
 };

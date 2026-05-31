@@ -10,6 +10,9 @@ import { drawKitchenScene }    from '../render/scenes/kitchen.js';
 import { drawBridgeScene }     from '../render/scenes/bridge.js';
 import { drawWaterfallScene }  from '../render/scenes/waterfall.js';
 import { drawAppleOrchardScene } from '../render/scenes/appleorchard.js';
+import { drawCitygate }        from '../render/scenes/citygate.js';
+import { drawMarketplace }     from '../render/scenes/marketplace.js';
+import { drawWorkshop }        from '../render/scenes/workshop.js';
 import { drawFetsson, drawPindus, drawMrsHen } from '../render/characters.js';
 
 import { isMinigameActive, updateMinigame, renderMinigame } from './minigame.js';
@@ -22,6 +25,9 @@ const SCENE_NAMES = {
   bridge:      'The Old Bridge',
   waterfall:   'Mossfall Grotto',
   appleorchard: 'The Apple Orchard',
+  citygate:    'Varnholm City Gate',
+  marketplace: 'The Market Square',
+  workshop:    "Algott's Workshop",
 };
 
 export function update() {
@@ -92,6 +98,9 @@ export function render(ctx) {
     case 'bridge':       drawBridgeScene(ctx);         break;
     case 'waterfall':    drawWaterfallScene(ctx);      break;
     case 'appleorchard': drawAppleOrchardScene(ctx);   break;
+    case 'citygate':     drawCitygate(ctx);            break;
+    case 'marketplace':  drawMarketplace(ctx);         break;
+    case 'workshop':     drawWorkshop(ctx);            break;
   }
 
   // Walk animation frame (0 when standing still)
