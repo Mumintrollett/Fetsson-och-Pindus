@@ -212,6 +212,9 @@ Minigames are full-screen interactive puzzles launched from a hotspot. While act
 |---|---|---|
 | `js/minigames/counterweight.js` | Bridge | Stack 4 stone weights heaviest → lightest (star 4 > moon 3 > sun 2 > cloud 1). Wrong order = shake + reset. |
 | `js/minigames/stonepath.js` | Waterfall/cave | Step across 4 columns of 3 stones. Each column has a carved symbol (Arch=mid, Peak=top, Bowl=bot, Diamond=mid). Wrong step = splash + reset. |
+| `js/minigames/planklay.js` | Bridge floor | Match 3 planks (by width label in cm) to 3 gaps in the bridge deck. Click plank → select; click matching gap → snap. Wrong width = shake. All placed = success. |
+
+> **See also**: `js/minigames/CLAUDE.md` for the full module interface spec and design conventions.
 
 ### Creating a new minigame
 1. Create `js/minigames/myminigame.js`:

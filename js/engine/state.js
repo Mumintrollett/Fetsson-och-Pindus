@@ -37,20 +37,22 @@ export const state = {
     // Post-pancake / apple quest arc
     pancakesEaten:      false,
     appleQuestGiven:    false,
+    barnCodeEntered:    false,
     toolboxOpen:        false,
 
     // Bridge
     bridgeVisited:      false,
-    bridgePlanksGot:    false,
+    planksPickedUp:     false,
     bridgeFloorFixed:   false,
     bridgeRailingFixed: false,
-    bridgeRepaired:     false,
+    bridgeGateOpen:     false,
+    bridgeCrossed:      false,
 
     // Waterfall
     waterfallVisited:   false,
-    torchFound:         false,
+    torchPickedUp:      false,
     torchLit:           false,
-    waterfallCrossed:   false,
+    caveCrossed:        false,
 
     // Apple Orchard
     orchardVisited:     false,

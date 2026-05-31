@@ -51,6 +51,22 @@ export function update() {
     }
   }
 
+  // Bridge movement clamping — prevent walking across broken/locked sections
+  if (state.scene === 'bridge') {
+    const p2 = state.player;
+    if (!state.flags.bridgeFloorFixed && p2.x > 185) {
+      // First gap starts ~x:200; clamp before it
+      p2.x             = 185;
+      p2.walking       = false;
+      p2.pendingAction = null;
+    } else if (!state.flags.bridgeGateOpen && p2.x > 640) {
+      // Gate is at x:360; right cliff beyond gate is inaccessible
+      p2.x             = 640;
+      p2.walking       = false;
+      p2.pendingAction = null;
+    }
+  }
+
   // Pindus lazily follows
   const dist = state.player.x - state.pindus.x;
   if (Math.abs(dist) > 70) {

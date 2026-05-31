@@ -2,6 +2,12 @@
 
 This file is written for AI coding agents (Claude, Copilot, etc.) working on this repository. It explains the project purpose, architecture, and concrete recipes for the most common expansion tasks.
 
+**Component-level guides** (more detail on specific subsystems):
+- `js/engine/CLAUDE.md` — engine module APIs, state object shape, movement clamping
+- `js/data/CLAUDE.md` — item/dialogue/hotspot schemas, puzzle conventions
+- `js/render/CLAUDE.md` — drawing functions, scene renderer interface, coordinate conventions
+- `js/minigames/CLAUDE.md` — minigame module interface, design conventions, recipe
+
 ---
 
 ## What this project is
@@ -35,7 +41,8 @@ js/
 │   └── minigame.js   ← minigame manager (startMinigame, endMinigame, etc.)
 ├── minigames/
 │   ├── counterweight.js ← stone-stacking puzzle (Bridge)
-│   └── stonepath.js     ← stepping-stone cave puzzle (Waterfall)
+│   ├── stonepath.js     ← stepping-stone cave puzzle (Waterfall)
+│   └── planklay.js      ← plank width-matching puzzle (Bridge floor)
 └── render/
     ├── utils.js      ← gradientRect(), drawRoundRect()
     ├── shared.js     ← drawCloud(), drawTree()  — reused across scenes
@@ -236,6 +243,7 @@ Minigames are self-contained interactive puzzles that temporarily take over the 
 | `js/engine/minigame.js` | Manager: `startMinigame(module, onDone)`, `endMinigame(success)`, `isMinigameActive()`, `updateMinigame()`, `renderMinigame(ctx)`, `handleMinigameClick(x, y)` |
 | `js/minigames/counterweight.js` | Counterweight stone-stacking puzzle (Bridge scene) |
 | `js/minigames/stonepath.js` | Cave stepping-stone puzzle (Waterfall scene) |
+| `js/minigames/planklay.js` | Plank width-matching puzzle (Bridge floor repair) |
 
 ### Each minigame module must export
 ```js
@@ -280,8 +288,8 @@ Title → Barn → Farm Yard → Garden → Kitchen
 1. Hay bale (trivial pick-up)
 2. Rusty gate — bucket → well → water on gate
 3. Hidden key — stick on garden gnome
-4. Bridge floor — planks (woodpile) + hammer (barn toolbox, code = 7)
-5. Bridge railing — rope (barn toolbox)
+4. Bridge floor — **Plank Minigame**: pick up planks from woodpile + get hammer from barn toolbox (code = 7); match 3 planks by width label to 3 gaps in the deck
+5. Bridge railing — rope (barn toolbox) + select from inventory → use on railing
 6. Counterweight gate — stack 4 stones heaviest-to-lightest (star 4 > moon 3 > sun 2 > cloud 1)
 7. Cave stepping stones — read symbol above each column; Arch=mid, Peak=top, Bowl=bottom, Diamond=mid
 8. Apple harvest — select basket, use on trees

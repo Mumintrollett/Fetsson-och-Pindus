@@ -19,6 +19,7 @@ import { transitionTo } from '../engine/transitions.js';
 import { startMinigame } from '../engine/minigame.js';
 import * as counterweightMinigame from '../minigames/counterweight.js';
 import * as stonepathMinigame     from '../minigames/stonepath.js';
+import * as plankMinigame         from '../minigames/planklay.js';
 
 // ─────────────────────────────────────────────────────────────
 // SCENE: BARN
@@ -325,7 +326,7 @@ const bridgeHotspots = [
   {
     id: 'bridge_return',
     label: '← Farm Yard',
-    x: 0, y: 200, w: 60, h: 240,
+    x: 0, y: 350, w: 90, h: 90,
     walkToX: 80,
     visible: () => true,
     onInteract() {
@@ -335,8 +336,8 @@ const bridgeHotspots = [
   {
     id: 'woodpile',
     label: 'Woodpile',
-    x: 40, y: 310, w: 120, h: 100,
-    walkToX: 110,
+    x: 10, y: 342, w: 118, h: 62,
+    walkToX: 80,
     visible: () => !state.flags.planksPickedUp,
     onInteract() {
       showDialogue(DLG.bridge_planks_pickup, () => {
@@ -345,29 +346,46 @@ const bridgeHotspots = [
       });
     },
   },
+  // ── Blocking hotspot: gap in broken floor ────────────────────
+  // Prevents clicking past the first gap to walk to the far side before repairs
+  {
+    id: 'bridge_gap_block',
+    label: 'Broken Bridge (impassable!)',
+    x: 195, y: 375, w: 475, h: 60,
+    walkToX: 165,
+    visible: () => !state.flags.bridgeFloorFixed,
+    onInteract() {
+      showDialogue([
+        { who: 'Fetsson', text: 'The gaps are too wide — I\'d fall straight into the ravine.' },
+        { who: 'Pindus',  text: 'Fix the floor first!  The woodpile near the left edge has spare planks.' },
+      ]);
+    },
+  },
   {
     id: 'bridge_floor',
     get label() {
       return state.flags.bridgeFloorFixed ? 'Bridge Floor (Fixed)' : 'Broken Bridge Floor';
     },
-    x: 290, y: 220, w: 220, h: 120,
-    walkToX: 340,
-    visible: () => !state.flags.bridgeCrossed,
+    x: 130, y: 375, w: 540, h: 45,
+    walkToX: 165,
+    visible: () => !state.flags.bridgeFloorFixed,
     onInteract() {
-      if (state.flags.bridgeFloorFixed) {
-        showDialogue([{ who: 'Fetsson', text: 'The floor is solid. Now I need to secure the railing too.' }]);
-      } else if (!state.flags.planksPickedUp) {
+      if (!state.flags.planksPickedUp) {
         showDialogue(DLG.bridge_no_tools);
-      } else if (!state.flags.barnCodeEntered) {
-        showDialogue([{ who: 'Fetsson', text: 'I have planks but I need a hammer. There was a toolbox in the barn...' }]);
-      } else if (state.selectedItem === 'hammer') {
-        showDialogue(DLG.bridge_fix_floor, () => {
-          state.flags.bridgeFloorFixed = true;
-          deselectItem();
-          removeItem('planks');
-        });
+      } else if (!state.inventory.includes('hammer')) {
+        showDialogue(DLG.bridge_need_hammer);
       } else {
-        showDialogue([{ who: 'Fetsson', text: 'I need to select the hammer from my inventory and use it on the broken planks.' }]);
+        // Launch the plank-laying minigame
+        showDialogue([
+          { who: 'Fetsson', text: 'Let\'s see… three gaps. I have planks of different sizes in my arms.' },
+          { who: 'Pindus',  text: 'Match each plank to the right gap — they must fit exactly before you can nail them!' },
+        ], () => {
+          startMinigame(plankMinigame, () => {
+            state.flags.bridgeFloorFixed = true;
+            removeItem('planks');
+            showDialogue(DLG.bridge_fix_floor);
+          });
+        });
       }
     },
   },
@@ -376,13 +394,11 @@ const bridgeHotspots = [
     get label() {
       return state.flags.bridgeRailingFixed ? 'Bridge Railing (Secured)' : 'Fraying Rope Railing';
     },
-    x: 290, y: 180, w: 220, h: 45,
-    walkToX: 340,
-    visible: () => !state.flags.bridgeCrossed,
+    x: 110, y: 344, w: 560, h: 38,
+    walkToX: 160,
+    visible: () => state.flags.bridgeFloorFixed && !state.flags.bridgeRailingFixed,
     onInteract() {
-      if (!state.flags.bridgeFloorFixed) {
-        showDialogue([{ who: 'Fetsson', text: 'I should fix the floor boards before worrying about the railing.' }]);
-      } else if (state.flags.bridgeRailingFixed) {
+      if (state.flags.bridgeRailingFixed) {
         showDialogue([{ who: 'Fetsson', text: 'The railing is already secure.' }]);
       } else if (state.selectedItem === 'rope') {
         showDialogue(DLG.bridge_fix_railing, () => {
@@ -390,33 +406,47 @@ const bridgeHotspots = [
           deselectItem();
           removeItem('rope');
         });
+      } else if (state.inventory.includes('rope')) {
+        showDialogue([{ who: 'Fetsson', text: 'I have rope! Let me select it from my inventory and use it on the railing.' }]);
       } else {
-        showDialogue([{ who: 'Fetsson', text: 'I need some strong rope to secure this railing.' }]);
+        showDialogue(DLG.bridge_need_rope);
       }
+    },
+  },
+  // ── Blocking hotspot: locked gate ───────────────────────────
+  {
+    id: 'gate_block',
+    label: 'Locked Gate',
+    x: 350, y: 280, w: 90, h: 140,
+    walkToX: 340,
+    visible: () => state.flags.bridgeFloorFixed && state.flags.bridgeRailingFixed && !state.flags.bridgeGateOpen,
+    onInteract() {
+      showDialogue([
+        { who: 'Fetsson', text: 'The gate is padlocked from a chain connected to that counterweight mechanism.' },
+        { who: 'Pindus',  text: 'Solve the weight puzzle on the mechanism to release it!' },
+      ]);
     },
   },
   {
     id: 'gate_wheel',
-    label: 'Counterweight Gate Mechanism',
-    x: 670, y: 180, w: 110, h: 200,
-    walkToX: 650,
+    label: 'Counterweight Mechanism',
+    x: 178, y: 250, w: 80, h: 160,
+    walkToX: 220,
     visible: () => state.flags.bridgeFloorFixed && state.flags.bridgeRailingFixed && !state.flags.bridgeGateOpen,
     onInteract() {
-      if (!state.flags.bridgeGateOpen) {
-        showDialogue(DLG.bridge_mechanism_hint, () => {
-          startMinigame(counterweightMinigame, () => {
-            state.flags.bridgeGateOpen = true;
-            showDialogue(DLG.bridge_repaired);
-          });
+      showDialogue(DLG.bridge_mechanism_hint, () => {
+        startMinigame(counterweightMinigame, () => {
+          state.flags.bridgeGateOpen = true;
+          showDialogue(DLG.bridge_repaired);
         });
-      }
+      });
     },
   },
   {
     id: 'bridge_cross',
     label: 'Cross the Bridge →',
-    x: 740, y: 150, w: 60, h: 290,
-    walkToX: 720,
+    x: 670, y: 300, w: 130, h: 140,
+    walkToX: 660,
     visible: () => state.flags.bridgeGateOpen,
     onInteract() {
       state.flags.bridgeCrossed = true;
