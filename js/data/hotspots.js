@@ -518,7 +518,8 @@ const waterfallHotspots = [
         showDialogue([{ who: 'Pindus', text: 'We already crossed that cave. Lovely acoustics in there, but let\'s not go back.' }]);
       } else {
         showDialogue(DLG.stepping_stone_intro, () => {
-          startMinigame(stonepathMinigame, () => {
+          startMinigame(stonepathMinigame, (success) => {
+            if (!success) return;
             state.flags.caveCrossed = true;
             showDialogue(DLG.waterfall_crossed, () => {
               transitionTo('appleorchard', 80, FLOOR_Y, 1);

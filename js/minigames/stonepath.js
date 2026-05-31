@@ -31,6 +31,7 @@ let playerCol   = -1;   // -1 = left bank, 0-3 = on column, 4 = right bank
 let shakeTimer  = 0;
 let splashCol   = -1;
 let splashRow   = -1;
+let resetOnShakeEnd = false;  // reset playerCol to -1 when shake finishes
 let successTimer = 0;
 let done        = false;
 let tick        = 0;    // local animation tick
@@ -38,13 +39,14 @@ let tick        = 0;    // local animation tick
 // ── Public API ────────────────────────────────────────────────────────────────
 
 export function reset() {
-  playerCol    = -1;
-  shakeTimer   = 0;
-  splashCol    = -1;
-  splashRow    = -1;
-  successTimer = 0;
-  done         = false;
-  tick         = 0;
+  playerCol        = -1;
+  shakeTimer       = 0;
+  splashCol        = -1;
+  splashRow        = -1;
+  resetOnShakeEnd  = false;
+  successTimer     = 0;
+  done             = false;
+  tick             = 0;
 }
 
 export function update() {
@@ -54,6 +56,10 @@ export function update() {
     if (shakeTimer === 0) {
       splashCol = -1;
       splashRow = -1;
+      if (resetOnShakeEnd) {
+        playerCol       = -1;
+        resetOnShakeEnd = false;
+      }
     }
   }
   if (successTimer > 0) {
@@ -63,7 +69,15 @@ export function update() {
 }
 
 export function handleClick(cx, cy) {
-  if (done || shakeTimer > 0) return;
+  if (done) return;
+
+  // ── Exit button (top-right) ───────────────────────────────────────────────
+  if (cx >= W - 90 && cx <= W - 12 && cy >= 8 && cy <= 36) {
+    endMinigame(false);
+    return;
+  }
+
+  if (shakeTimer > 0) return;
 
   const nextCol = playerCol + 1;
   if (nextCol > 3) return; // already on last stone, wait for success
@@ -171,14 +185,22 @@ export function render(ctx) {
 
   // Hint text (top bar)
   ctx.fillStyle = 'rgba(10,8,20,0.72)';
-  ctx.fillRect(PANEL_X(), 8, W - 2 * PANEL_X(), 30);
+  ctx.fillRect(PANEL_X(), 8, W - 2 * PANEL_X() - 84, 30);
   ctx.fillStyle = 'rgba(200,180,255,0.9)';
   ctx.font = '11px Georgia, serif';
   ctx.textAlign = 'center';
   ctx.fillText(
     'Carved symbols mark each column — read them carefully before you step',
-    W / 2, 27
+    (PANEL_X() + W - PANEL_X() - 84) / 2, 27
   );
+
+  // Exit button (top-right)
+  ctx.fillStyle = 'rgba(80,20,10,0.85)';
+  drawRoundRect(ctx, W - 88, 8, 76, 28, 6, 'rgba(80,20,10,0.85)', '#b05030', 1.5);
+  ctx.fillStyle = '#ffb080';
+  ctx.font      = 'bold 11px Georgia, serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('✕  Leave', W - 50, 26);
 
   // Success flash
   if (successTimer > 0) {
@@ -215,10 +237,10 @@ function _stepOn(col, row) {
     }
   } else {
     // Fell in!
-    splashCol  = col;
-    splashRow  = row;
-    shakeTimer = 40;
-    setTimeout(() => { playerCol = -1; }, 600);
+    splashCol       = col;
+    splashRow       = row;
+    shakeTimer      = 40;
+    resetOnShakeEnd = true;
   }
 }
 

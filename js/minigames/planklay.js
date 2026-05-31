@@ -37,11 +37,13 @@ const PLANK_DEFS = [
   { w: 18, col: '#caa048', shadow: '#786028' },
 ];
 
-const PLANK_H      = 22;
-const DECK_Y       = 220;   // y of bridge deck surface
-const SHELF_Y      = 340;   // y of plank shelf
-// Shelf positions: 3 per row, 2 rows (+ last row of 3 below)
-const SHELF_CX     = [170, 310, 450, 590, 170, 310, 450, 590, 310];
+const PLANK_H      = 32;    // visual height of shelf planks
+const PLANK_SCALE  = 3.4;   // multiply plank cm by this for visual pixel width
+const DECK_Y       = 210;   // y of bridge deck surface
+const SHELF_Y      = 338;   // y of plank shelf row 1
+// Row 1 (indices 0-4): 5 planks; Row 2 (indices 5-8): 4 planks
+const SHELF_CX     = [135, 255, 370, 490, 605,   // row 1
+                       190, 320, 455, 585];        // row 2
 
 // ── Mutable state ─────────────────────────────────────────────────────────────
 let gaps         = [];
@@ -92,10 +94,11 @@ export function handleClick(cx, cy) {
   // ── Click on a shelf plank ────────────────────────────────────────────────
   for (let i = 0; i < planks.length; i++) {
     if (planks[i].placed) continue;
-    const sx = SHELF_CX[i];
-    const sy = _shelfY(i);
-    const p  = planks[i];
-    if (cx >= sx - p.w / 2 - 4 && cx <= sx + p.w / 2 + 4 &&
+    const sx   = SHELF_CX[i];
+    const sy   = _shelfY(i);
+    const p    = planks[i];
+    const visW = p.w * PLANK_SCALE;
+    if (cx >= sx - visW / 2 - 4 && cx <= sx + visW / 2 + 4 &&
         cy >= sy               && cy <= sy + PLANK_H) {
       if (selected.has(i)) {
         selected.delete(i);
@@ -162,8 +165,8 @@ export function render(ctx) {
 // ── Private helpers ───────────────────────────────────────────────────────────
 
 function _shelfY(i) {
-  // Two rows: indices 0–3 on first shelf row, 4–8 on second
-  return i < 5 ? SHELF_Y : SHELF_Y + PLANK_H + 12;
+  // Row 1: indices 0–4; Row 2: indices 5–8
+  return i < 5 ? SHELF_Y : SHELF_Y + PLANK_H + 14;
 }
 
 function _tryFit(gapIdx) {
@@ -217,14 +220,14 @@ function _drawBridgeSection(ctx) {
       ? Math.sin(shakeTimer * 1.5) * 5 : 0;
 
     if (!g.filled) {
-      // Dark hole — show required total width but NOT as "X cm" label
+      // Dark hole
       ctx.fillStyle = '#1a0c04';
       ctx.fillRect(g.cx - g.w / 2 + shakeX, DECK_Y, g.w, deckH);
       ctx.strokeStyle = shakeGapIdx === i ? '#ff4020' : '#3a1808';
       ctx.lineWidth = shakeGapIdx === i ? 2.5 : 1;
       ctx.strokeRect(g.cx - g.w / 2 + shakeX, DECK_Y, g.w, deckH);
 
-      // Small measurement marks on gap edges (ambiguous cues, not explicit)
+      // Measurement marks on gap edges
       ctx.strokeStyle = 'rgba(200,160,60,0.5)'; ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(g.cx - g.w / 2 + shakeX,       DECK_Y - 8);
@@ -236,6 +239,12 @@ function _drawBridgeSection(ctx) {
       ctx.moveTo(g.cx + g.w / 2 + shakeX, DECK_Y - 12);
       ctx.lineTo(g.cx + g.w / 2 + shakeX, DECK_Y - 4);
       ctx.stroke();
+
+      // Gap measurement label — clearly visible above the gap
+      ctx.fillStyle = shakeGapIdx === i ? '#ff8060' : '#f0d880';
+      ctx.font      = 'bold 13px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(g.w + ' cm', g.cx + shakeX, DECK_Y - 16);
     } else {
       // Filled — draw layered planks
       const pieces = g.filledWith || [];
@@ -277,9 +286,9 @@ function _drawBridgeSection(ctx) {
 }
 
 function _drawShelf(ctx) {
-  const rowY1 = SHELF_Y - 22;
-  const rowH  = PLANK_H * 2 + 12 + 26;
-  drawRoundRect(ctx, 80, rowY1, 640, rowH + 16, 8, '#2a1a08', '#6a4020', 1.5);
+  const rowY1 = SHELF_Y - 24;
+  const rowH  = PLANK_H * 2 + 14 + 30;
+  drawRoundRect(ctx, 76, rowY1, 648, rowH + 16, 8, '#2a1a08', '#6a4020', 1.5);
 
   ctx.fillStyle = '#b09060'; ctx.font = '11px Georgia, serif'; ctx.textAlign = 'center';
   ctx.fillText('Available Planks', W / 2, rowY1 + 14);
@@ -289,9 +298,10 @@ function _drawShelf(ctx) {
     const px         = SHELF_CX[i];
     const py         = _shelfY(i);
     const isSelected = selected.has(i);
+    const visW       = p.w * PLANK_SCALE;
 
     drawRoundRect(ctx,
-      px - p.w / 2, py, p.w, PLANK_H, 4,
+      px - visW / 2, py, visW, PLANK_H, 4,
       isSelected ? '#ffe080' : p.col,
       isSelected ? '#c08000' : p.shadow,
       isSelected ? 2.5 : 1.5);
@@ -299,21 +309,21 @@ function _drawShelf(ctx) {
     // Grain lines
     ctx.strokeStyle = isSelected ? 'rgba(160,100,0,0.4)' : 'rgba(80,40,5,0.3)';
     ctx.lineWidth   = 0.7;
-    for (let lx = px - p.w / 2 + 8; lx < px + p.w / 2 - 4; lx += 10) {
-      ctx.beginPath(); ctx.moveTo(lx, py + 3); ctx.lineTo(lx, py + PLANK_H - 3); ctx.stroke();
+    for (let lx = px - visW / 2 + 8; lx < px + visW / 2 - 4; lx += 12) {
+      ctx.beginPath(); ctx.moveTo(lx, py + 4); ctx.lineTo(lx, py + PLANK_H - 4); ctx.stroke();
     }
 
-    // Width label on plank
+    // Width label on plank — bold and clearly readable
     ctx.fillStyle = isSelected ? '#1a0000' : '#1a0c04';
-    ctx.font      = 'bold 9px monospace';
+    ctx.font      = `bold ${visW >= 50 ? 12 : 10}px monospace`;
     ctx.textAlign = 'center';
-    ctx.fillText(p.w + ' cm', px, py + PLANK_H / 2 + 3);
+    ctx.fillText(p.w + ' cm', px, py + PLANK_H / 2 + 4);
 
     // Selected indicator
     if (isSelected) {
       ctx.fillStyle = 'rgba(255,220,60,0.9)';
-      ctx.font = '11px sans-serif';
-      ctx.fillText('▲', px, py - 4);
+      ctx.font = '12px sans-serif';
+      ctx.fillText('▲', px, py - 5);
     }
   });
 }
